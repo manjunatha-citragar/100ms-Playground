@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import "./styles.css";
 
 export const registerEvents = (canvas) => {
-  console.log("registerEvents", canvas);
   canvas.on("object:added", function (options) {
     if (options.target) {
       var obj = options.target;
@@ -23,7 +22,7 @@ const insertItem = (itemType, canvas) => {
           left: 100,
           width: 50,
           height: 50,
-          fill: "#f55"
+          fill: "#f55",
         })
       );
       break;
@@ -39,7 +38,7 @@ const insertItem = (itemType, canvas) => {
           left: 210,
           width: 100,
           height: 100,
-          fill: "blue"
+          fill: "blue",
         })
       );
       break;
