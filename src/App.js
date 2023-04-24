@@ -6,7 +6,7 @@ import {
   selectIsConnectedToRoom,
   selectSessionMetadata,
   useHMSActions,
-  useHMSStore
+  useHMSStore,
 } from "@100mslive/react-sdk";
 import Conference from "./Conference";
 import Footer from "./Footer";
@@ -18,7 +18,8 @@ function App() {
   const isConnected = useHMSStore(selectIsConnectedToRoom);
   const hmsActions = useHMSActions();
   useRefreshSessionMetadata();
-  const pinnedMessage = useHMSStore(selectSessionMetadata);
+  const canvasMetadata = useHMSStore(selectSessionMetadata);
+  console.log("canvasMetadata:", canvasMetadata);
 
   useEffect(() => {
     window.onunload = () => {
@@ -35,8 +36,6 @@ function App() {
         <div className="container">
           <CanvasBoard />
           <Conference />
-          <Confetti />
-          <span>{JSON.stringify(pinnedMessage || "")}</span>
           <Footer />
         </div>
       ) : (

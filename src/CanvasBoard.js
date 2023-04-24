@@ -1,14 +1,7 @@
 import { fabric } from "fabric";
 import { useEffect, useState } from "react";
+import { useSetSessionMetadata } from "./hooks/useSetSessionMetadata";
 import "./styles.css";
-
-export const registerEvents = (canvas) => {
-  canvas.on("object:added", function (options) {
-    if (options.target) {
-      console.log("You added a rectangle!", options.target.toJSON());
-    }
-  });
-};
 
 const insertItem = (itemType, canvas) => {
   switch (itemType) {
@@ -31,8 +24,8 @@ const insertItem = (itemType, canvas) => {
     case "TRIANGLE":
       canvas.add(
         new fabric.Triangle({
-          top: 300,
-          left: 210,
+          top: 250,
+          left: 110,
           width: 100,
           height: 100,
           fill: "blue",
@@ -58,6 +51,7 @@ const insertItem = (itemType, canvas) => {
 
 export const CanvasBoard = () => {
   const [canvas, setCanvas] = useState("");
+  const { setSessionMetadata } = useSetSessionMetadata();
 
   useEffect(() => {
     setCanvas(initCanvas());
@@ -67,7 +61,7 @@ export const CanvasBoard = () => {
     new fabric.Canvas("my_canvas", {
       height: 400,
       width: 540,
-      backgroundColor: "pink",
+      backgroundColor: "grey",
     });
 
   useEffect(() => {
@@ -76,7 +70,7 @@ export const CanvasBoard = () => {
     }
 
     canvas.on("object:added", (options) => {
-      console.log("object: added", options.target);
+      setSessionMetadata(JSON.stringify(options.target));
     });
 
     return () => {
