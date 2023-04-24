@@ -1,14 +1,11 @@
 import { fabric } from "fabric";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./styles.css";
 
 export const registerEvents = (canvas) => {
   canvas.on("object:added", function (options) {
     if (options.target) {
-      var obj = options.target;
-      if (obj.type === "rect") {
-        console.log("You added a rectangle!", options.target.toJSON());
-      }
+      console.log("You added a rectangle!", options.target.toJSON());
     }
   });
 };
@@ -54,15 +51,38 @@ const insertItem = (itemType, canvas) => {
       );
       break;
     default:
+      break;
   }
+  canvas.renderAll();
 };
 
 export const CanvasBoard = () => {
-  let canvas = new fabric.Canvas("my_canvas");
-  canvas.isDrawingMode = true;
+  const [canvas, setCanvas] = useState("");
+
   useEffect(() => {
-    registerEvents(canvas);
+    setCanvas(initCanvas());
   }, []);
+
+  const initCanvas = () =>
+    new fabric.Canvas("my_canvas", {
+      height: 400,
+      width: 540,
+      backgroundColor: "pink",
+    });
+
+  useEffect(() => {
+    if (!canvas) {
+      return;
+    }
+
+    canvas.on("object:added", (options) => {
+      console.log("object: added", options.target);
+    });
+
+    return () => {
+      canvas.off("object:added");
+    };
+  }, [canvas]);
 
   return (
     <div className="canvas-container">
