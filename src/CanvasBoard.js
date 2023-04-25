@@ -1,3 +1,4 @@
+import { selectSessionMetadata, useHMSStore } from "@100mslive/react-sdk";
 import { fabric } from "fabric";
 import { useEffect, useState } from "react";
 import { useSetSessionMetadata } from "./hooks/useSetSessionMetadata";
@@ -52,15 +53,32 @@ const insertItem = (itemType, canvas) => {
 export const CanvasBoard = () => {
   const [canvas, setCanvas] = useState("");
   const { setSessionMetadata } = useSetSessionMetadata();
+  const canvasMetadata = useHMSStore(selectSessionMetadata);
 
   useEffect(() => {
     setCanvas(initCanvas());
   }, []);
 
+  useEffect(() => {
+    if (!canvasMetadata) return;
+
+    const metaData = JSON.parse(canvasMetadata);
+    console.log("Received metadata", metaData);
+    if (metaData?.type === "rect") {
+      canvas.add(new fabric.Rect(metaData));
+    } else if (metaData?.type === "circle") {
+      canvas.add(new fabric.Circle(metaData));
+    } else if (metaData?.type === "triangle") {
+      canvas.add(new fabric.Triangle(metaData));
+    } else if (metaData?.type === "image") {
+      // Todo
+    }
+  }, [canvasMetadata]);
+
   const initCanvas = () =>
     new fabric.Canvas("my_canvas", {
       height: 400,
-      width: 540,
+      width: 500,
       backgroundColor: "grey",
     });
 
@@ -68,6 +86,8 @@ export const CanvasBoard = () => {
     if (!canvas) {
       return;
     }
+    // Todo enable drawing mode
+    canvas.isDrawingMode = true;
 
     canvas.on("object:added", (options) => {
       setSessionMetadata(JSON.stringify(options.target));
@@ -106,9 +126,7 @@ export const CanvasBoard = () => {
           Insert Image
         </button>
       </div>
-      <canvas id="my_canvas" height="400" width="400">
-        Go Canvas!
-      </canvas>
+      <canvas id="my_canvas">Go Canvas!</canvas>
     </div>
   );
 };
