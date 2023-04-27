@@ -1,8 +1,11 @@
 import { selectSessionMetadata, useHMSStore } from "@100mslive/react-sdk";
 import { fabric } from "fabric";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useContext } from "react";
+import { CanvasContext } from "./App";
 import { useSetSessionMetadata } from "./hooks/useSetSessionMetadata";
+import { CANVAS_ACTIONS } from "./state/canvasReducer";
 import "./styles.css";
+import { ToolBox } from "./ToolBox";
 
 const insertItem = (itemType, canvas) => {
   switch (itemType) {
@@ -51,82 +54,39 @@ const insertItem = (itemType, canvas) => {
 };
 
 export const CanvasBoard = () => {
-  const [canvas, setCanvas] = useState("");
+  const containerRef = useRef(null);
   const { setSessionMetadata } = useSetSessionMetadata();
   const canvasMetadata = useHMSStore(selectSessionMetadata);
+  const { state, dispatch } = useContext(CanvasContext);
 
   useEffect(() => {
-    setCanvas(initCanvas());
-  }, []);
-
-  useEffect(() => {
-    if (!canvasMetadata) return;
-
-    const metaData = JSON.parse(canvasMetadata);
-    console.log("Received metadata", metaData);
-    if (metaData?.type === "rect") {
-      canvas.add(new fabric.Rect(metaData));
-    } else if (metaData?.type === "circle") {
-      canvas.add(new fabric.Circle(metaData));
-    } else if (metaData?.type === "triangle") {
-      canvas.add(new fabric.Triangle(metaData));
-    } else if (metaData?.type === "image") {
-      // Todo
-    }
-  }, [canvasMetadata]);
-
-  const initCanvas = () =>
-    new fabric.Canvas("my_canvas", {
-      height: 400,
-      width: 500,
+    let canvas = new fabric.Canvas("my_canvas", {
       backgroundColor: "grey",
     });
+    canvas.setWidth(containerRef.current.offsetWidth);
+    canvas.setHeight(containerRef.current.offsetHeight);
 
-  useEffect(() => {
-    if (!canvas) {
-      return;
-    }
-    // Todo enable drawing mode
-    canvas.isDrawingMode = true;
+    dispatch({ type: CANVAS_ACTIONS.INIT, canvas: canvas, color: "#000" });
 
-    canvas.on("object:added", (options) => {
-      setSessionMetadata(JSON.stringify(options.target));
+    canvas.on("path:created", (options) => {
+      console.log("Setting SessionMetadata", JSON.stringify(options?.path));
+      setSessionMetadata(JSON.stringify(options?.path));
     });
 
     return () => {
-      canvas.off("object:added");
+      canvas.off("path:created");
+      if (canvas) {
+        canvas.dispose();
+        canvas = null;
+      }
     };
-  }, [canvas]);
+  }, []);
 
   return (
-    <div className="canvas-container">
-      <div className="canvas-controls">
-        <button
-          className="btn btn-primary"
-          onClick={() => insertItem("RECT", canvas)}
-        >
-          Insert Rect
-        </button>
-        <button
-          className="btn btn-primary"
-          onClick={() => insertItem("CIRCLE", canvas)}
-        >
-          Insert Circle
-        </button>
-        <button
-          className="btn btn-primary"
-          onClick={() => insertItem("TRIANGLE", canvas)}
-        >
-          Insert TRIANGLE
-        </button>
-        <button
-          className="btn btn-primary"
-          onClick={() => insertItem("IMG", canvas)}
-        >
-          Insert Image
-        </button>
-      </div>
+    <div className="canvas-container" ref={containerRef}>
+      <h2 className="text-center my-1">Drawing Board</h2>
       <canvas id="my_canvas">Go Canvas!</canvas>
+      <ToolBox />
     </div>
   );
 };
