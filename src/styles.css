@@ -157,19 +157,36 @@ form h2,
 
 .container {
   max-width: 1100px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-top: 50px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+  justify-items: center;
+  border: 1px solid #fff;
+  margin: 20px auto;
 }
 
 .canvas-container {
-  width: 60%;
+  height: "100%";
+  width: 800px;
 }
 
-.canvas-container .canvas-controls {
+.color-chooser:hover {
+  cursor: pointer;
+}
+
+.flex {
   display: flex;
   justify-content: space-between;
-  gap: "10px";
+}
+
+.color-chooser {
+  width: 75px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.my-1 {
+  margin: 1rem 0;
 }

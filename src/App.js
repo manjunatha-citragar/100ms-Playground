@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, createContext, useReducer } from "react";
 import JoinRoom from "./JoinRoom";
 import "./styles.css";
 
@@ -13,13 +13,16 @@ import Footer from "./Footer";
 import Confetti from "./Confetti";
 import { useRefreshSessionMetadata } from "./hooks/useRefreshSessionMetadata";
 import { CanvasBoard } from "./CanvasBoard";
+import { canvasReducer, INITIAL_STATE } from "./state/canvasReducer";
 
+export const CanvasContext = createContext();
 function App() {
   const isConnected = useHMSStore(selectIsConnectedToRoom);
   const hmsActions = useHMSActions();
   useRefreshSessionMetadata();
   const canvasMetadata = useHMSStore(selectSessionMetadata);
-  console.log("canvasMetadata:", canvasMetadata);
+  // console.log("canvasMetadata:", canvasMetadata);
+  const [state, dispatch] = useReducer(canvasReducer, INITIAL_STATE);
 
   useEffect(() => {
     window.onunload = () => {
@@ -31,13 +34,14 @@ function App() {
 
   return (
     <div className="App">
-      {/* <Header /> */}
       {isConnected ? (
-        <div className="container">
-          <CanvasBoard />
-          <Conference />
-          <Footer />
-        </div>
+        <CanvasContext.Provider value={{ state, dispatch }}>
+          <div className="container">
+            <CanvasBoard />
+            <Conference />
+            <Footer />
+          </div>
+        </CanvasContext.Provider>
       ) : (
         <JoinRoom />
       )}
