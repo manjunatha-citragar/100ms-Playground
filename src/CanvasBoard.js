@@ -59,6 +59,28 @@ export const CanvasBoard = () => {
   const canvasMetadata = useHMSStore(selectSessionMetadata);
   const { state, dispatch } = useContext(CanvasContext);
 
+  const onMouseDown = (event, canvas) => {
+    console.log("OnMouseDown:", event);
+    const { pointer } = canvas.getPointer(event);
+    const payload = { onMouseDown: true, pointer, event };
+    setSessionMetadata(JSON.stringify(payload));
+  };
+
+  const onMouseUp = (event, canvas) => {
+    console.log("OnMouseUp", event);
+    const { pointer } = canvas.getPointer(event);
+    const payload = { onMouseUp: true, pointer, event };
+    setSessionMetadata(JSON.stringify(payload));
+  };
+
+  const drawRealTime = (event, canvas) => {
+    console.log("Draw real time:", event, pointer);
+    const pointer = canvas.getPointer(event);
+    const payload = { drawPointer: true, pointer, event };
+    setSessionMetadata(JSON.stringify(payload));
+  };
+
+  // Init Canvas
   useEffect(() => {
     let canvas = new fabric.Canvas("my_canvas", {
       backgroundColor: "grey",
@@ -67,20 +89,53 @@ export const CanvasBoard = () => {
     canvas.setHeight(containerRef.current.offsetHeight);
 
     dispatch({ type: CANVAS_ACTIONS.INIT, canvas: canvas, color: "#000" });
+    setSessionMetadata({});
 
-    canvas.on("path:created", (options) => {
-      console.log("Setting SessionMetadata", JSON.stringify(options?.path));
-      setSessionMetadata(JSON.stringify(options?.path));
-    });
+    let isDrawing = false;
+
+    canvas
+      .on("mouse:down", (event) => {
+        isDrawing = true;
+        onMouseDown(event, canvas);
+      })
+      .on("mouse:up", (event) => {
+        isDrawing = false;
+        onMouseUp(event, canvas);
+      })
+      .on("mouse:move", (event) => {
+        if (isDrawing) {
+          drawRealTime(event, canvas);
+        }
+      });
 
     return () => {
-      canvas.off("path:created");
       if (canvas) {
         canvas.dispose();
         canvas = null;
       }
     };
   }, []);
+
+  // Draw on Canvas by reading session metadata
+  useEffect(() => {
+    if (!canvasMetadata || typeof canvasMetadata !== "string") return;
+    console.log("Canvas metadata:", canvasMetadata);
+    const { canvas } = state;
+    const {
+      pointer,
+      event,
+      onMouseDown = false,
+      onMouseUp = false,
+      drawPointer = false,
+    } = JSON.parse(canvasMetadata);
+    if (pointer && onMouseDown) {
+      canvas?.freeDrawingBrush?.onMouseDown(pointer, { e: event, pointer });
+    } else if (pointer && drawPointer) {
+      canvas?.freeDrawingBrush?.onMouseMove(pointer, { e: event, pointer });
+    } else if (pointer && onMouseUp) {
+      canvas?.freeDrawingBrush?.onMouseUp(pointer, { e: event, pointer });
+    }
+  }, [canvasMetadata]);
 
   return (
     <div className="canvas-container" ref={containerRef}>
