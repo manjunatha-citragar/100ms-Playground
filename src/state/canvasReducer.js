@@ -34,7 +34,7 @@ export const canvasReducer = (state, action) => {
       const { color } = action;
       state.color = color;
       state.canvas.freeDrawingBrush.color = color;
-      state.canvas.freeDrawingBrush.width = 35;
+      state.canvas.freeDrawingBrush.width = 5;
       state.canvas.freeDrawingBrush.color = action.color;
       state.canvas.isDrawingMode = true;
       return { ...state };
