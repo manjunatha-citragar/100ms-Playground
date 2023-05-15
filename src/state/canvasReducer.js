@@ -10,6 +10,7 @@ export const CANVAS_ACTIONS = {
   DELETE_OBJECT: "DELETE_OBJECT",
   DOWNLOAD_CANVAS: "DOWNLOAD_CANVAS",
   CHOOSE_COLOR: "CHOOSE_COLOR",
+  INSERT_TRIANGLE: "INSERT_TRIANGLE",
 };
 
 export const canvasReducer = (state, action) => {
@@ -75,6 +76,22 @@ export const canvasReducer = (state, action) => {
       a.href = uri;
       a.download = "Online_Drawer.png";
       a.click();
+      return { ...state };
+
+    case CANVAS_ACTIONS.INSERT_TRIANGLE:
+      if (!state.canvas) {
+        return state;
+      }
+
+      state.canvas.add(
+        new fabric.Triangle({
+          top: 250,
+          left: 110,
+          width: 100,
+          height: 100,
+          fill: "blue",
+        })
+      );
       return { ...state };
 
     default:

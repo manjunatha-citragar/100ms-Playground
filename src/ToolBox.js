@@ -39,9 +39,9 @@ export const ToolBox = () => {
       </button>
       <button
         className="btn btn-primary"
-        onClick={() => dispatch({ type: CANVAS_ACTIONS.DOWNLOAD_CANVAS })}
+        onClick={() => dispatch({ type: CANVAS_ACTIONS.INSERT_TRIANGLE })}
       >
-        Download
+        Inser Triangle
       </button>
     </div>
   );
