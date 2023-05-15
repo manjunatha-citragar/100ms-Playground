@@ -3,61 +3,23 @@ import { fabric } from "fabric";
 import { useEffect, useRef, useContext } from "react";
 import { CanvasContext } from "./App";
 import { useSetSessionMetadata } from "./hooks/useSetSessionMetadata";
+import { useSyncWhiteBoard } from "./hooks/useSyncWhiteBoard";
 import { CANVAS_ACTIONS } from "./state/canvasReducer";
 import "./styles.css";
 import { ToolBox } from "./ToolBox";
-
-const insertItem = (itemType, canvas) => {
-  switch (itemType) {
-    case "RECT":
-      canvas.add(
-        new fabric.Rect({
-          top: 100,
-          left: 100,
-          width: 50,
-          height: 50,
-          fill: "#f55",
-        })
-      );
-      break;
-    case "CIRCLE":
-      canvas.add(
-        new fabric.Circle({ top: 140, left: 230, radius: 75, fill: "green" })
-      );
-      break;
-    case "TRIANGLE":
-      canvas.add(
-        new fabric.Triangle({
-          top: 250,
-          left: 110,
-          width: 100,
-          height: 100,
-          fill: "blue",
-        })
-      );
-      break;
-    case "IMG":
-      fabric.Image.fromURL(
-        "https://upload.wikimedia.org/wikipedia/commons/d/d7/Sad-pug.jpg",
-        function (img) {
-          img.set({ left: 400, top: 250, angle: 20 });
-          img.scaleToHeight(100);
-          img.scaleToWidth(200);
-          canvas.add(img);
-        }
-      );
-      break;
-    default:
-      break;
-  }
-  canvas.renderAll();
-};
 
 export const CanvasBoard = () => {
   const containerRef = useRef(null);
   const { setSessionMetadata } = useSetSessionMetadata();
   const canvasMetadata = useHMSStore(selectSessionMetadata);
   const { state, dispatch } = useContext(CanvasContext);
+
+  const syncWhiteBoard = () => {
+    console.log("Sync whiteboard");
+    console.log(state?.canvas?.toJSON());
+  };
+
+  useSyncWhiteBoard(5000, syncWhiteBoard);
 
   const onMouseDown = (event, canvas) => {
     console.log("OnMouseDown:", event);
